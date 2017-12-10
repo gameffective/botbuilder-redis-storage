@@ -63,12 +63,14 @@ export class RedisStorage implements IBotStorage {
 
     Promise.all(operations.map((entry) => {
       return new Promise((resolve, reject) => {
+        var self = this;
         this.redis.get(entry.key, (err, obj) => {
           if (err) { reject(err) }
 
           data[entry.type] = JSON.parse(obj || "{}")
-
-          resolve()
+          self.redis.quit();
+          resolve();
+          
         })
       })
     })).then(() => {
@@ -111,10 +113,12 @@ export class RedisStorage implements IBotStorage {
       return new Promise((resolve, reject) => {
         const value = JSON.stringify(entry.data)
 
+        var self = this;
         this.redis.set(entry.key, value, (err) => {
           if (err) { reject(err) }
 
-          resolve()
+          resolve();
+          self.redis.quit();
         })
       })
     })).then(() => {
